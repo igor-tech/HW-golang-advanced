@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 func main() {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	var wg sync.WaitGroup
 	chanRandom := make(chan int, 10)
 	chanSquares := make(chan int, 10)
@@ -16,7 +19,7 @@ func main() {
 		defer wg.Done()
 
 		for i := 0; i < 10; i++ {
-			chanRandom <- rand.Intn(101)
+			chanRandom <- rnd.Intn(101)
 		}
 
 		close(chanRandom)

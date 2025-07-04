@@ -7,19 +7,25 @@ import (
 )
 
 type Config struct {
-	Email    string
-	Password string
-	Address  string
+	SMTPHost string
+	SMTPPassword string
+	SMTPEmail string
+	SMTPPort string
+	BaseUrl string
+	Address string
 }
 
-func NewConfig() *Config {
-	if err := godotenv.Load(); err != nil {
+func LoadConfig() *Config {
+	if err := godotenv.Load("../.env"); err != nil {
 		fmt.Println(".env file not found")
 	}
 
 	return &Config{
-		Email:    os.Getenv("EMAIL"),
-		Password: os.Getenv("PASSWORD"),
-		Address:  os.Getenv("ADDRESS"),
+		SMTPHost: os.Getenv("SMTP_HOST"),
+		SMTPPassword: os.Getenv("SMTP_PASSWORD"),
+		SMTPEmail: os.Getenv("SMTP_EMAIL"),
+		SMTPPort: os.Getenv("SMTP_PORT"),
+		BaseUrl: os.Getenv("BASE_URL"),
+		Address: os.Getenv("ADDRESS"),
 	}
 }

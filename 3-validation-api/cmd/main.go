@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-	conf := configs.NewConfig()
+	conf := configs.LoadConfig()
 	router := http.NewServeMux()
-	verify.NewVerifyHandler(router, verify.VerifyHandlerDeps{conf})
+	verify.NewVerifyHandler(router, verify.VerifyHandlerDeps{Config: conf})
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    conf.Address,
 		Handler: router,
 	}
 

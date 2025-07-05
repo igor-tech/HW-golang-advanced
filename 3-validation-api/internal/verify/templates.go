@@ -82,7 +82,6 @@ const emailTemplate = `
             </a>
         </div>
         <p style="color: #666; font-size: 14px; text-align: center;">
-            Ссылка действительна 24 часа.<br>
             Если вы не регистрировались на нашем сайте, проигнорируйте это письмо.
         </p>
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
@@ -137,7 +136,6 @@ const errorTemplate = `
             Возможные причины:
         </p>
         <ul style="text-align: left; color: #666;">
-            <li>Ссылка устарела (действительна 24 часа)</li>
             <li>Email уже был подтвержден</li>
             <li>Неверная ссылка</li>
         </ul>

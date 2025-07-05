@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/smtp"
-	"time"
 	"verify/email/configs"
 
 	"github.com/jordan-wright/email"

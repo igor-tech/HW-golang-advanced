@@ -72,6 +72,7 @@ func (s *EmailService) findToken(token string) (*VerificationToken, error) {
 	}
 	return nil, fmt.Errorf("token not found")
 }
+
 func (s *EmailService) markTokenUsed(token string) error {
 	for i, t := range s.storage.Tokens {
 		if t.Token == token {
@@ -81,3 +82,14 @@ func (s *EmailService) markTokenUsed(token string) error {
 	}
 	return fmt.Errorf("token not found")
 }
+
+func (s *EmailService) removeToken(token string) error {
+	for i, t := range s.storage.Tokens {
+		if t.Token == token {
+			s.storage.Tokens = append(s.storage.Tokens[:i], s.storage.Tokens[i+1:]...)
+			return s.saveTokens()
+		}
+	}
+	return fmt.Errorf("token not found")
+}
+

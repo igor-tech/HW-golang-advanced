@@ -30,6 +30,7 @@ func NewVerifyHandler(router *http.ServeMux, deps VerifyHandlerDeps) {
 		emailService: NewEmailService(deps.Config),
 	}
 
+	router.HandleFunc("POST /send", handler.SendEmail())
 	router.HandleFunc("GET /verify/{token}", handler.Verify())
 }
 
@@ -146,7 +147,15 @@ func (handler *VerifyHandler) Verify() http.HandlerFunc {
 		}
 
 		if err := handler.emailService.markTokenUsed(token); err != nil {
-			errorPage, _ := renderErrorPage("Ошибка подтверждения")
+			errorPage, _ := renderErrorPage("Token not found")
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(errorPage))
+			return
+		}
+
+		if err := handler.emailService.removeToken(token); err != nil {
+			errorPage, _ := renderErrorPage("Token not found")
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errorPage))

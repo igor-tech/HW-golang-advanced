@@ -30,12 +30,17 @@ func NewVerifyHandler(router *http.ServeMux, deps VerifyHandlerDeps) {
 		emailService: NewEmailService(deps.Config),
 	}
 
-	router.HandleFunc("POST /send", handler.SendEmail())
-	router.HandleFunc("GET /verify/{token}", handler.Verify())
+	router.HandleFunc("/send", handler.SendEmail())
+	router.HandleFunc("GET /verify/{hash}", handler.Verify())
 }
 
 func (handler *VerifyHandler) SendEmail() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		var req SendEmailRequest
 
 		// Парсинг JSON
@@ -108,7 +113,7 @@ func (handler *VerifyHandler) SendEmail() http.HandlerFunc {
 
 func (handler *VerifyHandler) Verify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.PathValue("token")
+		token := r.PathValue("hash")
 
 		if token == "" {
 			errorPage, _ := renderErrorPage("Missing token")
@@ -124,32 +129,6 @@ func (handler *VerifyHandler) Verify() http.HandlerFunc {
 			errorPage, _ := renderErrorPage("Invalid token")
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(errorPage))
-			return
-		}
-
-		// Проверка срока действия токена
-		if time.Now().After(tokenData.ExpiresAt) {
-			errorPage, _ := renderErrorPage("Token expired")
-			w.Header().Set("Content-Type", "text/html")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(errorPage))
-			return
-		}
-
-		// Проверка использования токена
-		if tokenData.Used {
-			errorPage, _ := renderErrorPage("Token already used")
-			w.Header().Set("Content-Type", "text/html")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(errorPage))
-			return
-		}
-
-		if err := handler.emailService.markTokenUsed(token); err != nil {
-			errorPage, _ := renderErrorPage("Token not found")
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errorPage))
 			return
 		}

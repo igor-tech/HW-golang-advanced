@@ -4,16 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"time"
 	"verify/email/configs"
 )
 
 type VerificationToken struct {
-	Email     string    `json:"email"`
-	ExpiresAt time.Time `json:"expires_at"`
-	Used      bool      `json:"used"`
-	CreatedAt time.Time `json:"created_at"`
-	Token     string    `json:"token"`
+	Email string `json:"email"`
+	Token string `json:"token"`
 }
 
 type TokenStorage struct {
@@ -54,11 +50,8 @@ func (s *EmailService) saveTokens() error {
 
 func (s *EmailService) addToken(email, token string) error {
 	newToken := VerificationToken{
-		Email:     email,
-		Token:     token,
-		ExpiresAt: time.Now().Add(time.Hour * 24),
-		Used:      false,
-		CreatedAt: time.Now(),
+		Email: email,
+		Token: token,
 	}
 	s.storage.Tokens = append(s.storage.Tokens, newToken)
 	return s.saveTokens()
@@ -73,16 +66,6 @@ func (s *EmailService) findToken(token string) (*VerificationToken, error) {
 	return nil, fmt.Errorf("token not found")
 }
 
-func (s *EmailService) markTokenUsed(token string) error {
-	for i, t := range s.storage.Tokens {
-		if t.Token == token {
-			s.storage.Tokens[i].Used = true
-			return s.saveTokens()
-		}
-	}
-	return fmt.Errorf("token not found")
-}
-
 func (s *EmailService) removeToken(token string) error {
 	for i, t := range s.storage.Tokens {
 		if t.Token == token {
@@ -92,4 +75,3 @@ func (s *EmailService) removeToken(token string) error {
 	}
 	return fmt.Errorf("token not found")
 }
-

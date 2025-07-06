@@ -1,0 +1,24 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"order/api/configs"
+	"order/api/pkg/db"
+)
+
+func main() {
+	conf := configs.LoadConfig()
+	_ = db.NewDb(conf)
+	router := http.NewServeMux()
+
+	server := http.Server{
+		Addr:    conf.Address,
+		Handler: router,
+	}
+
+	fmt.Println("Server is running on port", conf.Address)
+	if err := server.ListenAndServe(); err != nil {
+		panic(err)
+	}
+}

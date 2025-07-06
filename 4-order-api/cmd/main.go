@@ -17,7 +17,7 @@ func main() {
 		Handler: router,
 	}
 
-	fmt.Println("Server is running on port", conf.Address)
+	fmt.Printf("Server starting on %s\n", conf.Address)
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

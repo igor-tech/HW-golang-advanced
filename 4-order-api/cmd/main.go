@@ -6,7 +6,15 @@ import (
 	"order/api/configs"
 	"order/api/internal/product"
 	"order/api/pkg/db"
+	"order/api/pkg/middleware"
+
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.InfoLevel)
+}
 
 func main() {
 	conf := configs.LoadConfig()
@@ -25,7 +33,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    conf.Address,
-		Handler: router,
+		Handler: middleware.Logger(router),
 	}
 
 	fmt.Printf("Server starting on %s\n", conf.Address)

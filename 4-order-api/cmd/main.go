@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"order/api/configs"
+	"order/api/internal/auth"
+	"order/api/internal/jwt"
 	"order/api/internal/product"
+	"order/api/internal/user"
 	"order/api/pkg/db"
 	"order/api/pkg/middleware"
 
@@ -19,16 +22,26 @@ func init() {
 func main() {
 	conf := configs.LoadConfig()
 	database := db.NewDb(conf)
-	productRepository := product.NewProductRepository(database.DB)
+	jwtSecret := jwt.NewSecret(conf.JwtSecret)
 
-	if err := database.AutoMigrate(&product.Product{}); err != nil {
+	// Migrations
+	if err := database.AutoMigrate(&product.Product{}, &user.User{}); err != nil {
 		panic(fmt.Sprintf("Failed to migrate database: %v", err))
 	}
 
-	router := http.NewServeMux()
+	// Repositories
+	productRepository := product.NewProductRepository(database.DB)
+	userRepository := user.NewUserRepository(database.DB)
 
+	// Handlers
+	router := http.NewServeMux()
 	product.NewProductHandler(router, product.ProductHandlerDeps{
 		ProductRepository: productRepository,
+		Config:            conf,
+	})
+	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
+		UserRepository: userRepository,
+		JWT:            jwtSecret,
 	})
 
 	server := http.Server{

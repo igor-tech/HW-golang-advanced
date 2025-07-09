@@ -2,6 +2,8 @@ package product
 
 import (
 	"net/http"
+	"order/api/configs"
+	"order/api/pkg/middleware"
 	"order/api/pkg/request"
 	"order/api/pkg/response"
 	"strconv"
@@ -11,22 +13,25 @@ import (
 
 type ProductHandler struct {
 	productRepository *ProductRepository
+	config            *configs.Config
 }
 
 type ProductHandlerDeps struct {
 	ProductRepository *ProductRepository
+	Config            *configs.Config
 }
 
 func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 	productHandler := &ProductHandler{
 		productRepository: deps.ProductRepository,
+		config:            deps.Config,
 	}
 
 	router.HandleFunc("GET /products", productHandler.GetProducts())
 	router.HandleFunc("GET /products/{id}", productHandler.GetProductById())
-	router.HandleFunc("POST /products", productHandler.CreateProduct())
-	router.HandleFunc("PATCH /products/{id}", productHandler.UpdateProduct())
-	router.HandleFunc("DELETE /products/{id}", productHandler.DeleteProduct())
+	router.Handle("POST /products", middleware.IsAuth(productHandler.CreateProduct(), deps.Config))
+	router.Handle("PATCH /products/{id}", middleware.IsAuth(productHandler.UpdateProduct(), deps.Config))
+	router.Handle("DELETE /products/{id}", middleware.IsAuth(productHandler.DeleteProduct(), deps.Config))
 
 }
 

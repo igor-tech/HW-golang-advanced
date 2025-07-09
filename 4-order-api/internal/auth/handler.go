@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"order/api/internal/jwt"
 	"order/api/internal/user"
@@ -47,6 +48,7 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 			return
 		}
 
+		fmt.Println(code) // SEND SMS Service
 		codeHash := user.HashCode(int(code), sessionID)
 
 		u := user.User{
@@ -82,7 +84,6 @@ func (h *AuthHandler) Verify() http.HandlerFunc {
 		}
 
 		if !user.CheckHash(payload.Code, usr.SessionID, usr.Code) {
-			_ = h.UserRepository.UpsertSession(usr)
 			http.Error(w, "Invalid code", http.StatusUnauthorized)
 			return
 		}
@@ -93,7 +94,7 @@ func (h *AuthHandler) Verify() http.HandlerFunc {
 			return
 		}
 
-		if err = h.UserRepository.UpdateFields(usr.ID, map[string]interface{}{"code": ""}); err != nil {
+		if err = h.UserRepository.UpdateFields(usr.ID, map[string]interface{}{"code": "", "session_id": ""}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

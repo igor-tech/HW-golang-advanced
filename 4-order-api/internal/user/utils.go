@@ -19,21 +19,21 @@ func GenerateSessionID() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func GenerateCode() (string, error) {
+func GenerateCode() (int, error) {
 	const max = 10000 // 0000…9999
 	nBig, err := rand.Int(rand.Reader, big.NewInt(max))
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	return fmt.Sprintf("%04d", nBig.Int64()), nil
+	return int(nBig.Int64()), nil
 }
 
-func HashCode(code, salt string) string {
-	h := sha256.Sum256([]byte(code + salt))
+func HashCode(code int, salt string) string {
+	h := sha256.Sum256([]byte(fmt.Sprintf("%d%s", code, salt)))
 	return hex.EncodeToString(h[:])
 }
 
-func CheckHash(code, sessionID, hash string) bool {
+func CheckHash(code int, sessionID, hash string) bool {
 	return HashCode(code, sessionID) == hash
 }

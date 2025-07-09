@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"order/api/internal/jwt"
 	"order/api/internal/user"
@@ -48,13 +47,12 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 			return
 		}
 
-		fmt.Println(code) // SEND SMS
-		codeHash := user.HashCode(code, sessionID)
+		codeHash := user.HashCode(int(code), sessionID)
 
 		u := user.User{
-			PhoneNumber: payload.PhoneNumber,
-			SessionID:   sessionID,
-			Code:        codeHash,
+			Phone:     payload.Phone,
+			SessionID: sessionID,
+			Code:      codeHash,
 		}
 
 		if err := h.UserRepository.UpsertSession(&u); err != nil {
@@ -89,7 +87,7 @@ func (h *AuthHandler) Verify() http.HandlerFunc {
 			return
 		}
 
-		token, err := h.JWT.Create(jwt.JWTData{PhoneNumber: usr.PhoneNumber})
+		token, err := h.JWT.Create(jwt.JWTData{Phone: usr.Phone})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

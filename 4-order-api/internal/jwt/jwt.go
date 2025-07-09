@@ -12,7 +12,7 @@ type PhoneNumberKeyType string
 const PhoneNumberKey PhoneNumberKeyType = "phone_number"
 
 type JWTData struct {
-	PhoneNumber string
+	Phone string
 }
 
 type JWT struct {
@@ -25,7 +25,7 @@ func NewSecret(secret string) *JWT {
 
 func (j *JWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		string(PhoneNumberKey): data.PhoneNumber,
+		string(PhoneNumberKey): data.Phone,
 		"exp":                  time.Now().Add(time.Hour * 24).Unix(),
 		"iat":                  time.Now().Unix(),
 	})
@@ -44,10 +44,10 @@ func (j *JWT) Parse(token string) (bool, *JWTData) {
 		return false, nil
 	}
 
-	phoneNumber, ok := parsedToken.Claims.(jwt.MapClaims)[string(PhoneNumberKey)].(string)
+	phone, ok := parsedToken.Claims.(jwt.MapClaims)[string(PhoneNumberKey)].(string)
 	if !ok {
 		return false, nil
 	}
 
-	return parsedToken.Valid, &JWTData{PhoneNumber: phoneNumber}
+	return parsedToken.Valid, &JWTData{Phone: phone}
 }

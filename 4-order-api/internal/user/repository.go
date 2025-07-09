@@ -31,7 +31,7 @@ func (r *UserRepository) FindBySessionId(sid string) (*User, error) {
 }
 
 func (r *UserRepository) UpsertSession(u *User) error {
-	existing, err := r.FindByPhone(u.PhoneNumber)
+	existing, err := r.FindByPhone(u.Phone)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return r.db.Create(u).Error

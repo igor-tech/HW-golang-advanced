@@ -9,8 +9,8 @@ type LoginResponse struct {
 }
 
 type VerifyRequest struct {
-	Code      int `json:"code" validate:"required,len=4"`
-	SessionID string `json:"sessionId" validate:"required,len=32"`
+	Code      int    `json:"code" validate:"required,min=1000,max=9999"`
+	SessionID string `json:"sessionId" validate:"required,min=32,max=32"`
 }
 
 type VerifyResponse struct {

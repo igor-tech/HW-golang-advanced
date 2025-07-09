@@ -16,7 +16,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (r *UserRepository) FindByPhone(phone string) (*User, error) {
 	var u User
-	if err := r.db.Where("phone_number = ?", phone).First(&u).Error; err != nil {
+	if err := r.db.Where("phone = ?", phone).First(&u).Error; err != nil {
 		return nil, err
 	}
 	return &u, nil

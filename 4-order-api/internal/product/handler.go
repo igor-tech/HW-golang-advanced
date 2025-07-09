@@ -32,6 +32,7 @@ func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 	router.Handle("POST /products", middleware.IsAuth(productHandler.CreateProduct(), deps.Config))
 	router.Handle("PATCH /products/{id}", middleware.IsAuth(productHandler.UpdateProduct(), deps.Config))
 	router.Handle("DELETE /products/{id}", middleware.IsAuth(productHandler.DeleteProduct(), deps.Config))
+	router.Handle("POST /products/{id}/buy", middleware.IsAuth(productHandler.BuyProduct(), deps.Config))
 
 }
 
@@ -121,6 +122,24 @@ func (h *ProductHandler) GetProductById() http.HandlerFunc {
 			return
 		}
 
+		product, err := h.productRepository.GetById(uint(id))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		response.Response(w, http.StatusOK, product)
+	}
+}
+
+func (h *ProductHandler) BuyProduct() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		stringId := r.PathValue("id")
+		id, err := strconv.ParseUint(stringId, 10, 32)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		
 		product, err := h.productRepository.GetById(uint(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

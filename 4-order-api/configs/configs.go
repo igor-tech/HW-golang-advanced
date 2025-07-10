@@ -14,6 +14,7 @@ type DbConfig struct {
 type Config struct {
 	DbConfig
 	Address string
+	JwtSecret string
 }
 
 func LoadConfig() *Config {
@@ -24,5 +25,6 @@ func LoadConfig() *Config {
 	return &Config{
 		DbConfig: DbConfig{Dsn: os.Getenv("DSN")},
 		Address:  os.Getenv("ADDRESS"),
+		JwtSecret: os.Getenv("JWT_SECRET"),
 	}
 }

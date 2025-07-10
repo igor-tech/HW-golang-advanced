@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"order/api/internal/jwt"
+	"order/api/internal/model"
 	"order/api/internal/user"
 	"order/api/pkg/request"
 	"order/api/pkg/response"
@@ -51,7 +52,7 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 		fmt.Println(code) // SEND SMS Service
 		codeHash := user.HashCode(int(code), sessionID)
 
-		u := user.User{
+		u := model.User{
 			Phone:     payload.Phone,
 			SessionID: sessionID,
 			Code:      codeHash,
@@ -88,7 +89,7 @@ func (h *AuthHandler) Verify() http.HandlerFunc {
 			return
 		}
 
-		token, err := h.JWT.Create(jwt.JWTData{Phone: usr.Phone})
+		token, err := h.JWT.Create(jwt.JWTData{Phone: usr.Phone, UserID: usr.ID})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

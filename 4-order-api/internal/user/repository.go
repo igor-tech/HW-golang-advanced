@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"order/api/internal/model"
 
 	"gorm.io/gorm"
 )
@@ -14,23 +15,23 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) FindByPhone(phone string) (*User, error) {
-	var u User
+func (r *UserRepository) FindByPhone(phone string) (*model.User, error) {
+	var u model.User
 	if err := r.db.Where("phone = ?", phone).First(&u).Error; err != nil {
 		return nil, err
 	}
 	return &u, nil
 }
 
-func (r *UserRepository) FindBySessionId(sid string) (*User, error) {
-	var u User
+func (r *UserRepository) FindBySessionId(sid string) (*model.User, error) {
+	var u model.User
 	if err := r.db.Where("session_id = ?", sid).First(&u).Error; err != nil {
 		return nil, err
 	}
 	return &u, nil
 }
 
-func (r *UserRepository) UpsertSession(u *User) error {
+func (r *UserRepository) UpsertSession(u *model.User) error {
 	existing, err := r.FindByPhone(u.Phone)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -48,7 +49,7 @@ func (r *UserRepository) UpdateFields(id uint,
 	fields map[string]interface{}) error {
 
 	return r.db.
-		Model(&User{}).
+		Model(&model.User{}).
 		Where("id = ?", id).
 		Updates(fields).Error
 }

@@ -1,4 +1,4 @@
-package product
+package model
 
 import (
 	"github.com/lib/pq"
@@ -10,6 +10,8 @@ type Product struct {
 	Name        string         `json:"name" validate:"required,min=3,max=255"`
 	Description string         `json:"description" validate:"required,min=3,max=255"`
 	Images      pq.StringArray `json:"images" validate:"required,min=1,max=10" gorm:"type:text[]" `
+
+	Orders []Order `gorm:"many2many:order_products"`
 }
 
 func NewProduct(name string, description string, images []string) *Product {

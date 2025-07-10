@@ -8,11 +8,16 @@ import (
 )
 
 type PhoneNumberKeyType string
+type UserIDKeyType string
 
-const PhoneNumberKey PhoneNumberKeyType = "phone_number"
+const (
+	PhoneNumberKey PhoneNumberKeyType = "ph"
+	UserIDKey      UserIDKeyType      = "sub"
+)
 
 type JWTData struct {
-	Phone string
+	UserID uint
+	Phone  string
 }
 
 type JWT struct {
@@ -25,9 +30,10 @@ func NewSecret(secret string) *JWT {
 
 func (j *JWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		string(PhoneNumberKey): data.Phone,
-		"exp":                  time.Now().Add(time.Hour * 24).Unix(),
-		"iat":                  time.Now().Unix(),
+		"ph":  data.Phone,
+		"sub": data.UserID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"iat": time.Now().Unix(),
 	})
 
 	return t.SignedString([]byte(j.Secret))
@@ -44,10 +50,20 @@ func (j *JWT) Parse(token string) (bool, *JWTData) {
 		return false, nil
 	}
 
-	phone, ok := parsedToken.Claims.(jwt.MapClaims)[string(PhoneNumberKey)].(string)
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok || !parsedToken.Valid {
+		return false, nil
+	}
+
+	phone, ok := claims[string(PhoneNumberKey)].(string)
 	if !ok {
 		return false, nil
 	}
 
-	return parsedToken.Valid, &JWTData{Phone: phone}
+	userIDFloat, ok := claims[string(UserIDKey)].(float64)
+	if !ok {
+		return false, nil
+	}
+
+	return parsedToken.Valid, &JWTData{Phone: phone, UserID: uint(userIDFloat)}
 }

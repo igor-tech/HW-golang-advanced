@@ -29,7 +29,10 @@ func IsAuth(next http.Handler, config *configs.Config) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), jwt.PhoneNumberKey, data.Phone)
+		ctx := context.WithValue(r.Context(), jwt.UserIDKey, data.UserID)
+		if data.Phone != "" {
+			ctx = context.WithValue(ctx, jwt.PhoneNumberKey, data.Phone)
+		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

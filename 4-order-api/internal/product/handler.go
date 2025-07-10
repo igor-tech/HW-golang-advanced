@@ -3,6 +3,7 @@ package product
 import (
 	"net/http"
 	"order/api/configs"
+	"order/api/internal/model"
 	"order/api/pkg/middleware"
 	"order/api/pkg/request"
 	"order/api/pkg/response"
@@ -53,7 +54,7 @@ func (h *ProductHandler) CreateProduct() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		product := NewProduct(payload.Name, payload.Description, payload.Images)
+		product := model.NewProduct(payload.Name, payload.Description, payload.Images)
 		_, err = h.productRepository.Create(product)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,7 +96,7 @@ func (h *ProductHandler) UpdateProduct() http.HandlerFunc {
 			return
 		}
 
-		product := &Product{
+		product := &model.Product{
 			Model:       gorm.Model{ID: uint(id)},
 			Name:        payload.Name,
 			Description: payload.Description,
@@ -139,7 +140,7 @@ func (h *ProductHandler) BuyProduct() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		
+
 		product, err := h.productRepository.GetById(uint(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -36,20 +36,19 @@ func (r *OrderRepository) Create(order *model.Order, productsIDs []uint) (*model
 			return err
 		}
 
-		if err := tx.Omit("Products.*").Create(order).Error; err != nil {
+		// Create order first
+		if err := tx.Create(order).Error; err != nil {
 			return err
 		}
 
-		products := make([]model.Product, len(productsIDs))
-		for i, id := range productsIDs {
-			products[i] = model.Product{Model: gorm.Model{ID: id}}
+		// Load existing products from database
+		var products []model.Product
+		if err := tx.Where("id IN (?)", dedup).Find(&products).Error; err != nil {
+			return err
 		}
 
-		if err := tx.Model(order).
-			Association("Products").
-			Append(products); err != nil {
-			// Rollback the transaction if the products are not found
-			order.ID = 0
+		// Associate products with order
+		if err := tx.Model(order).Association("Products").Append(products); err != nil {
 			return err
 		}
 

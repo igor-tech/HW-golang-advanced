@@ -73,10 +73,8 @@ func (h *OrderHandler) GetOrderById() http.HandlerFunc {
 			return
 		}
 
-		// Ищем заказ который принадлежит конкретному пользователю в одном запросе
 		order, err := h.OrderRepository.GetByIdAndUserId(uint(orderID), userID)
 		if err != nil {
-			// Одинаковая ошибка для всех случаев: заказ не найден ИЛИ не принадлежит пользователю
 			http.Error(w, "order not found", http.StatusNotFound)
 			return
 		}

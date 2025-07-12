@@ -79,7 +79,9 @@ func (h *OrderHandler) GetOrderById() http.HandlerFunc {
 			return
 		}
 
-		response.Response(w, http.StatusOK, order)
+		out := toDTO(*order)
+
+		response.Response(w, http.StatusOK, out)
 	}
 }
 func (h *OrderHandler) GetMyOrders() http.HandlerFunc {

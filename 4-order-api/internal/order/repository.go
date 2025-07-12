@@ -60,6 +60,19 @@ func (r *OrderRepository) Create(order *model.Order, productsIDs []uint) (*model
 	return order, nil
 }
 
+func (r *OrderRepository) GetByIdAndUserId(id uint, userId uint) (*model.Order, error) {
+	var order model.Order
+	err := r.db.
+		Model(&model.Order{}).
+		Preload("Products").
+		Where("id = ? AND user_id = ?", id, userId).
+		First(&order).Error
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
+}
+
 func (r *OrderRepository) GetById(id uint) (*model.Order, error) {
 	var order model.Order
 	err := r.db.

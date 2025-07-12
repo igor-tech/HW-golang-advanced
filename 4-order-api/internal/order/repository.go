@@ -1,6 +1,7 @@
 package order
 
 import (
+	"errors"
 	"order/api/internal/model"
 
 	"gorm.io/gorm"
@@ -14,9 +15,12 @@ func NewOrderRepository(db *gorm.DB) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-func (r *OrderRepository) Create(order *model.Order) (*model.Order, error) {
-
+func (r *OrderRepository) Create(order *model.Order, productsIDs []uint) (*model.Order, error) {
 	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := r.ValidateProductExist(tx, productsIDs); err != nil {
+			return err
+		}
+
 		if err := tx.Omit("Products.*").Create(order).Error; err != nil {
 			return err
 		}
@@ -59,4 +63,18 @@ func (r *OrderRepository) GetByUserId(userId uint) ([]model.Order, error) {
 		return nil, err
 	}
 	return orders, nil
+}
+
+func (r *OrderRepository) ValidateProductExist(tx *gorm.DB, ids []uint) error {
+	var cnt int64
+
+	err := tx.Model(&model.Product{}).Where("id IN (?)", ids).Count(&cnt).Error
+	if err != nil {
+		return err
+	}
+
+	if cnt != int64(len(ids)) {
+		return errors.New("some products not found")
+	}
+	return nil
 }

@@ -36,6 +36,7 @@ func orderToResponse(order *model.Order) CreateOrderResponse {
 		UpdatedAt:  order.UpdatedAt,
 	}
 }
+
 func toDTO(o model.Order) GetOrderResponse {
 	products := make([]Product, len(o.Products))
 	for i, p := range o.Products {

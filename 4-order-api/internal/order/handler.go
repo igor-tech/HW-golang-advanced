@@ -51,7 +51,7 @@ func (h *OrderHandler) CreateOrder() http.HandlerFunc {
 
 		createdOrder, err := h.OrderRepository.Create(&order, payload.ProductIDs)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 

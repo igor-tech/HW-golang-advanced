@@ -46,13 +46,12 @@ func (h *OrderHandler) CreateOrder() http.HandlerFunc {
 		}
 
 		order := model.Order{
-			UserID:   userID,
-			Products: idsToProduct(payload.ProductIDs),
+			UserID: userID,
 		}
 
 		createdOrder, err := h.OrderRepository.Create(&order, payload.ProductIDs)
 		if err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 

@@ -16,8 +16,23 @@ func NewOrderRepository(db *gorm.DB) *OrderRepository {
 }
 
 func (r *OrderRepository) Create(order *model.Order, productsIDs []uint) (*model.Order, error) {
+	if len(productsIDs) == 0 {
+		return nil, errors.New("productsIDs is empty")
+	}
+
+	// Remove duplicates
+	uniq := make(map[uint]struct{}, len(productsIDs))
+	for _, id := range productsIDs {
+		uniq[id] = struct{}{}
+	}
+	dedup := make([]uint, 0, len(uniq))
+	for id := range uniq {
+		dedup = append(dedup, id)
+	}
+
 	if err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := r.ValidateProductExist(tx, productsIDs); err != nil {
+		// Check that all products exist
+		if err := r.ValidateProductExist(tx, dedup); err != nil {
 			return err
 		}
 
@@ -25,14 +40,21 @@ func (r *OrderRepository) Create(order *model.Order, productsIDs []uint) (*model
 			return err
 		}
 
-		return tx.Model(order).
-			Association("Products").
-			Append(order.Products)
-	}); err != nil {
-		return nil, err
-	}
+		products := make([]model.Product, len(productsIDs))
+		for i, id := range productsIDs {
+			products[i] = model.Product{Model: gorm.Model{ID: id}}
+		}
 
-	if err := r.db.Preload("Products").First(order, order.ID).Error; err != nil {
+		if err := tx.Model(order).
+			Association("Products").
+			Append(products); err != nil {
+			// Rollback the transaction if the products are not found
+			order.ID = 0
+			return err
+		}
+
+		return tx.Preload("Products").First(order, order.ID).Error
+	}); err != nil {
 		return nil, err
 	}
 

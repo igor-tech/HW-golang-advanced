@@ -2,21 +2,7 @@ package order
 
 import (
 	"order/api/internal/model"
-
-	"gorm.io/gorm"
 )
-
-func idsToProduct(ids []uint) []model.Product {
-	products := make([]model.Product, len(ids))
-	for i, id := range ids {
-		products[i] = model.Product{
-			Model: gorm.Model{
-				ID: id,
-			},
-		}
-	}
-	return products
-}
 
 func orderToResponse(order *model.Order) CreateOrderResponse {
 	if order == nil {
